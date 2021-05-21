@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+<div class="col" style="background-color: #262e35;">
+
+
+    <div class="d-flex flex-row p-3" style="border-bottom: solid 2px  #36404a;">
+        <div class="pt-1" style="max-width: 50px;">
+            <div class="d-flex justify-content-center align-items-center">
+                <img src="https://widgetwhats.com/app/uploads/2019/11/free-profile-photo-whatsapp-4.png" alt="..."
+                    width="40px" height="40px" class="rounded-circle">
+            </div>
+        </div>
+        <div class="px-3 flex-grow-1">
+            <h6 class="text-light">{{room_name}}</h6>
+
+            <div class="d-flex flex-row align-items-center" style="color:#abb4d2; font-size: 14px;">
+                Online
+                <div class="m-2" style="width: 8px; height:8px; border-radius: 50%; background-color: #28a745;"></div>
+            </div>
+        </div>
+        <div class="d-flex flex-row align-items-center" style="max-width: 100px">
+            <div class="d-flex flex-row">
+                <div class="px-3">
+                    <ion-icon name="call-outline" style="color: #abb4d2; font-size: 20px;"></ion-icon>
+                </div>
+
+                <div class="pe-3">
+                    <ion-icon name="videocam-outline" style="color: #abb4d2; font-size: 20px;"></ion-icon>
+                </div>
+
+                <div>
+                    <ion-icon name="ellipsis-vertical" style="color: #abb4d2; font-size: 20px;"></ion-icon>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!-- Message View -->
+    <div class="d-flex flex-column">
+
+        <div class="overflow-auto" style="height: 750px;" id="chat-log">
+
+            <!-- <div class="d-flex flex-row justify-content-start p-3">
+                <div class="pe-2 d-flex flex-column justify-content-end" style="max-width: 50px;">
+                    <div class="d-flex justify-content-center">
+                        <img src="https://widgetwhats.com/app/uploads/2019/11/free-profile-photo-whatsapp-4.png"
+                            alt="..." width="40px" height="40px" class="rounded-circle">
+                    </div>
+                </div>
+
+                <div class="d-flex flex-column">
+                    <div class="talk-bubble-left tri-right round btm-left">
+                        <div class="talktext">
+                            <pre>Good morning. And now using .round we can smooth the sides down. Also uses .btm-left to
+                                show a triangle at the.</pre>
+                            <span class="float-end text-light" style="font-size: 12px;">05 min</span>
+                        </div>
+                    </div>
+                    <small style="color: #abb4d2;">Michael</small>
+                </div>
+
+
+            </div>
+
+            <div class="d-flex flex-row justify-content-end p-3">
+                <div class="d-flex flex-column">
+                    <div class="talk-bubble-right tri-right round btm-right">
+                        <div class="talktext">
+                            <pre>Good morning. And now using .round we can smooth the sides down. Also uses .btm-left to
+                                show a triangle at the bottom flush to the left.</pre>
+                            <small class="float-end text-light" style="font-size: 12px;">05 min</small>
+                        </div>
+                    </div>
+                </div>
+            </div> -->           
+
+        </div>
+
+        <!-- Message Pannel -->
+        <div class="d-flex flex-row align-items-center p-2" style="border-top: solid 2px  #36404a; position: relative;">
+            <div id="emoji-picker" style="display: none;">
+                <emoji-picker class="dark"></emoji-picker>
+            </div>
+
+            <a type="button" id="picker" onclick="mytoggle()">
+                <ion-icon name="happy-outline" class="emoji"></ion-icon>
+            </a>
+
+            <div>
+                <ion-icon name="attach-outline" class="attachment"></ion-icon>
+            </div>
+            <textarea name="text" id="message-input" cols="30" rows="2" placeholder="Type message"
+                style="width: 100%;"></textarea>
+
+            <div>
+                <!-- <input id="message-submit" type="button" value="Send"> -->
+                <a type="button" id="message-submit">
+                    <ion-icon name="send-outline" class="send"></ion-icon>
+
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+    {{ room_name|json_script:"room-name" }}
+    {{ user.username|json_script:"username" }}
+
+    <script>
+        const roomName = JSON.parse(document.getElementById('room-name').textContent);
+
+        const chatSocket = new WebSocket(
+            'ws://' +
+            window.location.host +
+            '/ws/chat/' +
+            roomName +
+            '/'
+        );
+
+        chatSocket.onmessage = function (e) {
+            const data = JSON.parse(e.data);
+            const username = JSON.parse(document.getElementById('username').textContent);
+
+            var today = new Date();
+            var time = today.getHours() + ":" + today.getMinutes();
+
+            var log = $('#chat-log');
+
+            if ( data.username == username) { 
+                log.append(`
+                <div class="d-flex flex-row justify-content-end p-3">
+                    <div class="d-flex flex-column">
+                        <div class="talk-bubble-right tri-right round btm-right">
+                            <div class="talktext">
+                                <pre>${data.message}</pre>
+                                <small class="float-end text-light" style="font-size: 12px;">${time}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                `);
+            } else {
+                log.append(`
+                <div class="d-flex flex-row justify-content-start p-3">
+                    <div class="pe-2 d-flex flex-column justify-content-end" style="max-width: 50px;">
+                        <div class="d-flex justify-content-center">
+                            <img src="https://widgetwhats.com/app/uploads/2019/11/free-profile-photo-whatsapp-4.png"
+                                alt="..." width="40px" height="40px" class="rounded-circle">
+                        </div>
+                    </div>    
+                    <div class="d-flex flex-column">
+                        <div class="talk-bubble-left tri-right round btm-left">
+                            <div class="talktext">
+                                <pre>${data.message}</pre>
+                                <span class="float-end text-light" style="font-size: 12px;">${time}</span>
+                            </div>
+                        </div>
+                        <small style="color: #abb4d2;">${roomName}</small>
+                    </div>   
+                </div>
+                `);
+            }           
+        };
+
+
+        chatSocket.onclose = function (e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+
+        document.querySelector('#message-input').focus();
+              
+        //document.querySelector('#message-input').onkeyup = function (e) {
+        //    if (e.keyCode === 13) { // enter, return
+        //        document.querySelector('#message-submit').click();
+        //    }
+        //};
+        
+
+        document.querySelector('#message-submit').onclick = function (e) {
+            const messageInputDom = document.querySelector('#message-input');
+            const message = messageInputDom.value;
+            console.log(message);
+
+            if (message != ''){
+                chatSocket.send(JSON.stringify({
+                    'message': message
+                }));
+                messageInputDom.value = '';
+
+            }else {
+                messageInputDom.value = '';
+            }
+            
+            
+        };
+    </script>
+
+</div>
+
+{% endblock content %}
